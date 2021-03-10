@@ -17,7 +17,7 @@ app.post("/search", async function (req, res) {
   let response = await fetch(req.body.endpoint).catch((e) => {
     if (e.code == "EPROTO") {
       res.status(400).send({
-        error: `Unable to create a connection over HTTPS to ${req.body.endpoint}. Maybe the endpoint doesn't support SSL connections, try switching to http`,
+        error: `Unable to create a connection over HTTPS to ${req.body.endpoint}. Maybe the endpoint doesn't support SSL connections try switching to http`,
       });
       err = true;
     } else {
@@ -26,10 +26,12 @@ app.post("/search", async function (req, res) {
     }
   });
   if (!err) {
+    let secure_connection = req.body.endpoint.toLowerCase().includes("https");
     try {
       if (response.ok) {
         res.status(200).send({
           status: "unsecure",
+          secure_connection: secure_connection,
           data: {
             endpoint: req.body.endpoint,
             response_status: response.status,
@@ -41,6 +43,7 @@ app.post("/search", async function (req, res) {
         if (response.status == 401) {
           res.status(200).send({
             status: "secure",
+            secure_connection: secure_connection,
             data: {
               endpoint: req.body.endpoint,
               response_status: response.status,
